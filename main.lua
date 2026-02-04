@@ -1,12 +1,13 @@
 -- =========================================
--- 🔴 RED PAINEL 👺 0.5 | AIMBOT (HEAD LOCK) + ESP FIXO
+-- 🔴 RED PAINEL 👺 1.0 | AIMBOT (HEAD LOCK) + ESP FIXO
 -- =========================================
 
 -- ========= CONFIG =========
 local SETTINGS = {
 	AimEnabled = true,
+	TeamCheck = true,
 	FOV = 140,
-	Smoothness = 0.6 -- Gruda mais rápido
+	Smoothness = 0.6
 }
 
 -- ========= THEME =========
@@ -66,7 +67,6 @@ float.Position = UDim2.new(0.1,0,0.4,0)
 float.BackgroundColor3 = THEME.RedMain
 float.Active = true
 float.ZIndex = 1000
-
 Instance.new("UICorner", float).CornerRadius = UDim.new(0,10)
 
 local floatStroke = Instance.new("UIStroke", float)
@@ -74,7 +74,6 @@ floatStroke.Color = THEME.RedLight
 floatStroke.Thickness = 2
 floatStroke.Transparency = 0.15
 
--- 👺 EMOJI NO QUADRADO
 local floatIcon = Instance.new("TextLabel", float)
 floatIcon.Size = UDim2.new(1,0,1,0)
 floatIcon.BackgroundTransparency = 1
@@ -129,15 +128,14 @@ float.InputChanged:Connect(function(input)
 	end
 end)
 
--- ========= PAINEL =========
+-- ========= PAINEL CENTRALIZADO =========
 local panel = Instance.new("Frame", gui)
-panel.Size = UDim2.new(0,230,0,200)
-panel.Position = UDim2.new(0.25,0,0.3,0)
+panel.Size = UDim2.new(0,260,0,300)
+panel.Position = UDim2.new(0.5,-130,0.5,-150)
 panel.BackgroundColor3 = THEME.Black
 panel.Visible = false
 panel.Active = true
 panel.ZIndex = 900
-
 Instance.new("UICorner", panel).CornerRadius = UDim.new(0,12)
 
 local panelStroke = Instance.new("UIStroke", panel)
@@ -151,19 +149,18 @@ end)
 
 -- ========= TÍTULO =========
 local title = Instance.new("TextLabel", panel)
-title.Size = UDim2.new(1,0,0,32)
+title.Size = UDim2.new(1,0,0,36)
 title.BackgroundColor3 = THEME.RedDark
-title.Text = "🔴 RED PAINEL 👺 0.5"
+title.Text = "🔴 RED PAINEL 👺 1.0"
 title.TextColor3 = THEME.Text
 title.Font = Enum.Font.GothamBold
-title.TextSize = 14
+title.TextSize = 16
 title.ZIndex = 901
-
 Instance.new("UICorner", title).CornerRadius = UDim.new(0,12)
 
 -- ========= BOTÕES =========
 local function btn(txt,y)
-	local b = Instance.new("TextButton", panel)
+	local b = Instance.new("TextLabel", panel)
 	b.Size = UDim2.new(1,-30,0,32)
 	b.Position = UDim2.new(0,15,0,y)
 	b.BackgroundColor3 = THEME.BlackSoft
@@ -173,20 +170,81 @@ local function btn(txt,y)
 	b.TextSize = 13
 	b.ZIndex = 902
 	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
-
-	local s = Instance.new("UIStroke", b)
-	s.Color = THEME.RedMain
-	s.Thickness = 1
-	s.Transparency = 0.2
-
 	return b
 end
 
-local aimBtn = btn("🎯 AIM: ON",45)
+-- AIMBOT
+local aimBtnLbl = btn("🎯 AIMBOT",45)
+local toggle = Instance.new("Frame", panel)
+toggle.Size = UDim2.new(0,40,0,20)
+local textCenterY = aimBtnLbl.Position.Y.Offset + (aimBtnLbl.Size.Y.Offset/2) - (toggle.Size.Y.Offset/2)
+toggle.Position = UDim2.new(0,180,0,textCenterY)
+toggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
+toggle.ZIndex = 903
+Instance.new("UICorner", toggle).CornerRadius = UDim.new(0,10)
 
+local circle = Instance.new("Frame", toggle)
+circle.Size = UDim2.new(0,18,0,18)
+circle.Position = UDim2.new(0,1,0,1)
+circle.BackgroundColor3 = THEME.RedMain
+circle.ZIndex = 904
+Instance.new("UICorner", circle).CornerRadius = UDim.new(1,9)
+
+local function UpdateToggle()
+	if SETTINGS.AimEnabled then
+		circle:TweenPosition(UDim2.new(1,-19,0,1),"Out","Sine",0.2,true)
+		toggle.BackgroundColor3 = THEME.RedLight
+	else
+		circle:TweenPosition(UDim2.new(0,1,0,1),"Out","Sine",0.2,true)
+		toggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
+	end
+end
+
+toggle.InputBegan:Connect(function()
+	SETTINGS.AimEnabled = not SETTINGS.AimEnabled
+	UpdateToggle()
+end)
+
+UpdateToggle()
+
+-- TEAM CHECK (logo abaixo do AIMBOT)
+local teamBtnLbl = btn("🛡️ TEAM CHECK", 85)
+local teamToggle = Instance.new("Frame", panel)
+teamToggle.Size = UDim2.new(0,40,0,20)
+local teamCenterY = teamBtnLbl.Position.Y.Offset + (teamBtnLbl.Size.Y.Offset/2) - (teamToggle.Size.Y.Offset/2)
+teamToggle.Position = UDim2.new(0,180,0,teamCenterY)
+teamToggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
+teamToggle.ZIndex = 903
+Instance.new("UICorner", teamToggle).CornerRadius = UDim.new(0,10)
+
+local teamCircle = Instance.new("Frame", teamToggle)
+teamCircle.Size = UDim2.new(0,18,0,18)
+teamCircle.Position = UDim2.new(0,1,0,1)
+teamCircle.BackgroundColor3 = THEME.RedMain
+teamCircle.ZIndex = 904
+Instance.new("UICorner", teamCircle).CornerRadius = UDim.new(1,9)
+
+local function UpdateTeamToggle()
+	if SETTINGS.TeamCheck then
+		teamCircle:TweenPosition(UDim2.new(1,-19,0,1),"Out","Sine",0.2,true)
+		teamToggle.BackgroundColor3 = THEME.RedLight
+	else
+		teamCircle:TweenPosition(UDim2.new(0,1,0,1),"Out","Sine",0.2,true)
+		teamToggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
+	end
+end
+
+teamToggle.InputBegan:Connect(function()
+	SETTINGS.TeamCheck = not SETTINGS.TeamCheck
+	UpdateTeamToggle()
+end)
+
+UpdateTeamToggle()
+
+-- ========= FOV =========
 local fovTxt = Instance.new("TextLabel", panel)
 fovTxt.Size = UDim2.new(1,-30,0,24)
-fovTxt.Position = UDim2.new(0,15,0,85)
+fovTxt.Position = UDim2.new(0,15,0,125)
 fovTxt.Text = "👁️ FOV: "..SETTINGS.FOV
 fovTxt.TextColor3 = THEME.Text
 fovTxt.BackgroundTransparency = 1
@@ -194,20 +252,15 @@ fovTxt.Font = Enum.Font.GothamBold
 fovTxt.TextSize = 13
 fovTxt.ZIndex = 902
 
-local fovPlus = btn("➕ FOV",115)
-local fovMinus = btn("➖ FOV",155)
+local fovPlus = btn("➕ FOV",165)
+local fovMinus = btn("➖ FOV",205)
 
-aimBtn.MouseButton1Click:Connect(function()
-	SETTINGS.AimEnabled = not SETTINGS.AimEnabled
-	aimBtn.Text = SETTINGS.AimEnabled and "🎯 AIM: ON" or "🚫 AIM: OFF"
-end)
-
-fovPlus.MouseButton1Click:Connect(function()
+fovPlus.InputBegan:Connect(function()
 	SETTINGS.FOV = math.clamp(SETTINGS.FOV + 10, 50, 500)
 	fovTxt.Text = "👁️ FOV: "..SETTINGS.FOV
 end)
 
-fovMinus.MouseButton1Click:Connect(function()
+fovMinus.InputBegan:Connect(function()
 	SETTINGS.FOV = math.clamp(SETTINGS.FOV - 10, 50, 500)
 	fovTxt.Text = "👁️ FOV: "..SETTINGS.FOV
 end)
@@ -228,7 +281,6 @@ end)
 
 -- ========= ESP =========
 local ESP = {}
-
 local function CreateESP(player,char)
 	if player == LocalPlayer then return end
 	if ESP[player] then ESP[player]:Destroy() end
@@ -263,6 +315,9 @@ local function GetTarget()
 
 	for _,p in ipairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+			if SETTINGS.TeamCheck and p.Team == LocalPlayer.Team then
+				continue
+			end
 			local head = p.Character.Head
 			local pos,on = Camera:WorldToViewportPoint(head.Position)
 			if on then
@@ -282,7 +337,6 @@ end
 
 RunService.RenderStepped:Connect(function()
 	if not SETTINGS.AimEnabled then return end
-
 	local target = GetTarget()
 	if not target then return end
 
@@ -290,7 +344,7 @@ RunService.RenderStepped:Connect(function()
 	local dir = (target.Position - camPos).Unit
 	local dot = Camera.CFrame.LookVector:Dot(dir)
 
-	if dot > 0.3 then -- gruda mais fácil
+	if dot > 0.3 then
 		local cf = CFrame.new(camPos, target.Position)
 		Camera.CFrame = Camera.CFrame:Lerp(cf, SETTINGS.Smoothness)
 	end
@@ -299,10 +353,10 @@ end)
 -- ========= MENSAGEM AO EXECUTAR =========
 pcall(function()
 	game:GetService("StarterGui"):SetCore("SendNotification", {
-		Title = "🔴 RED PAINEL 👺 0.5",
+		Title = "🔴 RED PAINEL 👺 1.0",
 		Text = "RED PAINEL ATIVADO 🔥",
 		Duration = 5
 	})
 end)
 
-warn("🔴👺 RED PAINEL 0.5 CARREGADO 👺🔴")
+warn("🔴👺 RED PAINEL 1.0 CARREGADO 👺🔴")
