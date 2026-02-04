@@ -1,12 +1,12 @@
 -- =========================================
--- 🔴 RED PAINEL 👺 | AIM HOLD (HEAD LOCK) + ESP FIXO
+-- 🔴 RED PAINEL 👺 0.5 | AIMBOT (HEAD LOCK) + ESP FIXO
 -- =========================================
 
 -- ========= CONFIG =========
 local SETTINGS = {
 	AimEnabled = true,
 	FOV = 140,
-	Smoothness = 0.35
+	Smoothness = 0.6 -- Gruda mais rápido
 }
 
 -- ========= THEME =========
@@ -153,7 +153,7 @@ end)
 local title = Instance.new("TextLabel", panel)
 title.Size = UDim2.new(1,0,0,32)
 title.BackgroundColor3 = THEME.RedDark
-title.Text = "🔴 RED PAINEL 👺"
+title.Text = "🔴 RED PAINEL 👺 0.5"
 title.TextColor3 = THEME.Text
 title.Font = Enum.Font.GothamBold
 title.TextSize = 14
@@ -254,7 +254,7 @@ for _,p in ipairs(Players:GetPlayers()) do
 	end
 end
 
--- ========= AIM =========
+-- ========= AIMBOT AUTOMÁTICO =========
 local function GetTarget()
 	local vp = Camera.ViewportSize
 	local center = Vector2.new(vp.X/2, vp.Y/2)
@@ -281,7 +281,7 @@ local function GetTarget()
 end
 
 RunService.RenderStepped:Connect(function()
-	if not SETTINGS.AimEnabled or not HoldingFire then return end
+	if not SETTINGS.AimEnabled then return end
 
 	local target = GetTarget()
 	if not target then return end
@@ -290,19 +290,19 @@ RunService.RenderStepped:Connect(function()
 	local dir = (target.Position - camPos).Unit
 	local dot = Camera.CFrame.LookVector:Dot(dir)
 
-	if dot > 0.7 then
+	if dot > 0.3 then -- gruda mais fácil
 		local cf = CFrame.new(camPos, target.Position)
-		Camera.CFrame = Camera.CFrame:Lerp(cf, SETTINGS.Smoothness * dot)
+		Camera.CFrame = Camera.CFrame:Lerp(cf, SETTINGS.Smoothness)
 	end
 end)
 
 -- ========= MENSAGEM AO EXECUTAR =========
 pcall(function()
 	game:GetService("StarterGui"):SetCore("SendNotification", {
-		Title = "🔴 RED PAINEL 👺",
+		Title = "🔴 RED PAINEL 👺 0.5",
 		Text = "RED PAINEL ATIVADO 🔥",
 		Duration = 5
 	})
 end)
 
-warn("🔴👺 RED PAINEL CARREGADO 👺🔴")
+warn("🔴👺 RED PAINEL 0.5 CARREGADO 👺🔴")
