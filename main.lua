@@ -1,5 +1,5 @@
 -- =========================================
--- 🔴 RED PAINEL 👺 1.0 | AIMBOT (HEAD LOCK) + ESP FIXO + DISTANCE
+-- 🔴 RED PAINEL 👺 1.1 | AIMBOT (HEAD LOCK) + ESP FIXO + DISTANCE
 -- =========================================
 
 -- ========= CONFIG =========
@@ -128,7 +128,7 @@ end)
 local title = Instance.new("TextLabel", panel)
 title.Size = UDim2.new(1,0,0,36)
 title.BackgroundColor3 = THEME.RedDark
-title.Text = "🔴 RED PAINEL 👺 1.0"
+title.Text = "🔴 RED PAINEL 👺 1.1"
 title.TextColor3 = THEME.Text
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
@@ -635,10 +635,10 @@ credits.TextYAlignment = Enum.TextYAlignment.Center
 -- ========= MENSAGEM AO EXECUTAR =========
 pcall(function()
 	game:GetService("StarterGui"):SetCore("SendNotification", {
-		Title = "🔴 RED PAINEL 👺 1.0",
+		Title = "🔴 RED PAINEL 👺 1.1",
 		Text = "RED PAINEL ATIVADO 🔥",
 		Duration = 5
 	})
 end)
 
-warn("🔴👺 RED PAINEL 1.0 CARREGADO 👺🔴")
+warn("🔴👺 RED PAINEL 1.1 CARREGADO 👺🔴")
