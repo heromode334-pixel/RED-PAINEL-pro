@@ -520,6 +520,103 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+-- ========= ESP BOX + LINHA =========
+local espBoxBtnLbl = btn("📦 ESP BOX + LINHA", 285)
+local espBoxToggle = Instance.new("Frame", panel)
+espBoxToggle.Size = UDim2.new(0,40,0,20)
+local espBoxCenterY = espBoxBtnLbl.Position.Y.Offset + (espBoxBtnLbl.Size.Y.Offset/2) - (espBoxToggle.Size.Y.Offset/2)
+espBoxToggle.Position = UDim2.new(0,180,0,espBoxCenterY)
+espBoxToggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
+espBoxToggle.ZIndex = 903
+Instance.new("UICorner", espBoxToggle).CornerRadius = UDim.new(0,10)
+local espBoxCircle = Instance.new("Frame", espBoxToggle)
+espBoxCircle.Size = UDim2.new(0,18,0,18)
+espBoxCircle.Position = UDim2.new(0,1,0,1)
+espBoxCircle.BackgroundColor3 = THEME.RedMain
+espBoxCircle.ZIndex = 904
+Instance.new("UICorner", espBoxCircle).CornerRadius = UDim.new(1,9)
+
+local ESPBoxEnabled = false
+local ESPBoxLines = {}
+local ESPBoxFrames = {}
+
+local function UpdateESPBoxToggle()
+	if ESPBoxEnabled then
+		espBoxCircle:TweenPosition(UDim2.new(1,-19,0,1),"Out","Sine",0.2,true)
+		espBoxToggle.BackgroundColor3 = THEME.RedLight
+	else
+		espBoxCircle:TweenPosition(UDim2.new(0,1,0,1),"Out","Sine",0.2,true)
+		espBoxToggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
+        -- Limpa ESP caso desligado
+        for _,line in pairs(ESPBoxLines) do line:Destroy() end
+        for _,frame in pairs(ESPBoxFrames) do frame:Destroy() end
+        ESPBoxLines, ESPBoxFrames = {}, {}
+	end
+end
+
+espBoxToggle.InputBegan:Connect(function()
+	ESPBoxEnabled = not ESPBoxEnabled
+	UpdateESPBoxToggle()
+	
+	local status = ESPBoxEnabled and "ATIVADO ✅" or "DESATIVADO ❌"
+	pcall(function()
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "📦 ESP BOX + LINHA",
+			Text = status,
+			Duration = 3
+		})
+	end)
+end)
+UpdateESPBoxToggle()
+
+-- ========= ESP BOX + LINHA RENDER =========
+RunService.RenderStepped:Connect(function()
+	if not ESPBoxEnabled then return end
+	-- Limpa os anteriores
+	for _,line in pairs(ESPBoxLines) do line:Destroy() end
+	for _,frame in pairs(ESPBoxFrames) do frame:Destroy() end
+	ESPBoxLines, ESPBoxFrames = {}, {}
+
+	for _,p in pairs(Players:GetPlayers()) do
+		if p ~= LocalPlayer and p.Character then
+            local function getRoot(char)
+                if char:FindFirstChild("HumanoidRootPart") then return char.HumanoidRootPart end
+                if char:FindFirstChild("UpperTorso") then return char.UpperTorso end
+                if char:FindFirstChild("LowerTorso") then return char.LowerTorso end
+                for _,v in pairs(char:GetChildren()) do
+                    if v:IsA("BasePart") then return v end
+                end
+                return nil
+            end
+            local root = getRoot(p.Character)
+            if not root then continue end
+
+            local pos, onScreen = Camera:WorldToViewportPoint(root.Position)
+            if onScreen then
+                local size = 50 -- tamanho da caixa
+                -- Cria box
+                local box = Instance.new("Frame", gui)
+                box.Size = UDim2.new(0,size,0,size)
+                box.Position = UDim2.new(0,pos.X-size/2,0,pos.Y-size/2)
+                box.BackgroundTransparency = 1
+                box.BorderSizePixel = 2
+                box.BorderColor3 = THEME.RedMain
+                box.ZIndex = 2000
+                table.insert(ESPBoxFrames, box)
+
+                -- Cria linha até o centro da tela
+                local line = Drawing.new("Line")
+                line.From = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
+                line.To = Vector2.new(pos.X, pos.Y + size/2)
+                line.Color = THEME.RedMain
+                line.Thickness = 2
+                line.Transparency = 1
+                table.insert(ESPBoxLines, line)
+            end
+		end
+	end
+end)
+
 -- ========= CRÉDITOS =========
 local credits = Instance.new("TextLabel", panel)
 credits.Size = UDim2.new(1, -20, 0, 30)
