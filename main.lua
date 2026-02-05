@@ -5,7 +5,6 @@
 -- ========= CONFIG =========
 local SETTINGS = {
 	AimEnabled = true,
-	TeamCheck = true,
 	FOV = 140,
 	Smoothness = 0.6
 }
@@ -74,6 +73,7 @@ floatStroke.Color = THEME.RedLight
 floatStroke.Thickness = 2
 floatStroke.Transparency = 0.15
 
+-- 👺 EMOJI NO QUADRADO
 local floatIcon = Instance.new("TextLabel", float)
 floatIcon.Size = UDim2.new(1,0,1,0)
 floatIcon.BackgroundTransparency = 1
@@ -82,51 +82,6 @@ floatIcon.TextScaled = true
 floatIcon.Font = Enum.Font.GothamBold
 floatIcon.TextColor3 = THEME.Text
 floatIcon.ZIndex = 1001
-
-local floatBtn = Instance.new("TextButton", float)
-floatBtn.Size = UDim2.new(1,0,1,0)
-floatBtn.BackgroundTransparency = 1
-floatBtn.Text = ""
-floatBtn.ZIndex = 1002
-
--- ========= DRAG =========
-local dragging = false
-local dragStart
-local startPos
-
-local function updateDrag(input)
-	local delta = input.Position - dragStart
-	float.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X,
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y
-	)
-end
-
-float.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1
-	or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = float.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-float.InputChanged:Connect(function(input)
-	if dragging and (
-		input.UserInputType == Enum.UserInputType.MouseMovement
-		or input.UserInputType == Enum.UserInputType.Touch
-	) then
-		updateDrag(input)
-	end
-end)
 
 -- ========= PAINEL CENTRALIZADO =========
 local panel = Instance.new("Frame", gui)
@@ -143,8 +98,42 @@ panelStroke.Color = THEME.RedMain
 panelStroke.Thickness = 2
 panelStroke.Transparency = 0.15
 
-floatBtn.MouseButton1Click:Connect(function()
-	panel.Visible = not panel.Visible
+-- ========= DRAG FUNCIONAL COM CLIQUE =========
+local dragging = false
+local dragStart
+local startPos
+local clickThreshold = 5 -- Pixels mínimos para considerar arraste
+
+float.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = float.Position
+	end
+end)
+
+float.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+		local delta = input.Position - dragStart
+		if delta.Magnitude > clickThreshold then
+			float.Position = UDim2.new(
+				startPos.X.Scale,
+				startPos.X.Offset + delta.X,
+				startPos.Y.Scale,
+				startPos.Y.Offset + delta.Y
+			)
+		end
+	end
+end)
+
+float.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		local delta = (input.Position - dragStart).Magnitude
+		if delta < clickThreshold then
+			panel.Visible = not panel.Visible
+		end
+		dragging = false
+	end
 end)
 
 -- ========= TÍTULO =========
@@ -174,7 +163,7 @@ local function btn(txt,y)
 end
 
 -- AIMBOT
-local aimBtnLbl = btn("🎯 AIMBOT",45)
+local aimBtnLbl = btn("🎯 AIMBOT", 45)
 local toggle = Instance.new("Frame", panel)
 toggle.Size = UDim2.new(0,40,0,20)
 local textCenterY = aimBtnLbl.Position.Y.Offset + (aimBtnLbl.Size.Y.Offset/2) - (toggle.Size.Y.Offset/2)
@@ -207,7 +196,7 @@ end)
 
 UpdateToggle()
 
--- TEAM CHECK (logo abaixo do AIMBOT)
+-- TEAM CHECK
 local teamBtnLbl = btn("🛡️ TEAM CHECK", 85)
 local teamToggle = Instance.new("Frame", panel)
 teamToggle.Size = UDim2.new(0,40,0,20)
@@ -224,8 +213,9 @@ teamCircle.BackgroundColor3 = THEME.RedMain
 teamCircle.ZIndex = 904
 Instance.new("UICorner", teamCircle).CornerRadius = UDim.new(1,9)
 
+local TeamCheckEnabled = true
 local function UpdateTeamToggle()
-	if SETTINGS.TeamCheck then
+	if TeamCheckEnabled then
 		teamCircle:TweenPosition(UDim2.new(1,-19,0,1),"Out","Sine",0.2,true)
 		teamToggle.BackgroundColor3 = THEME.RedLight
 	else
@@ -235,7 +225,7 @@ local function UpdateTeamToggle()
 end
 
 teamToggle.InputBegan:Connect(function()
-	SETTINGS.TeamCheck = not SETTINGS.TeamCheck
+	TeamCheckEnabled = not TeamCheckEnabled
 	UpdateTeamToggle()
 end)
 
@@ -315,7 +305,7 @@ local function GetTarget()
 
 	for _,p in ipairs(Players:GetPlayers()) do
 		if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-			if SETTINGS.TeamCheck and p.Team == LocalPlayer.Team then
+			if TeamCheckEnabled and p.Team == LocalPlayer.Team then
 				continue
 			end
 			local head = p.Character.Head
