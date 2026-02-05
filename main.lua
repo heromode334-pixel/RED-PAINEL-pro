@@ -135,6 +135,102 @@ title.TextSize = 16
 title.ZIndex = 901
 Instance.new("UICorner", title).CornerRadius = UDim.new(0,12)
 
+-- ========= CLOSE BUTTON COM CONFIRMAÇÃO =========
+local closeBtn = Instance.new("TextButton", panel)
+closeBtn.Size = UDim2.new(0,28,0,28)
+closeBtn.Position = UDim2.new(1,-32,0,4) -- canto superior direito
+closeBtn.BackgroundColor3 = THEME.RedLight
+closeBtn.Text = "❌"
+closeBtn.TextColor3 = THEME.Text
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+closeBtn.ZIndex = 1002
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0,6)
+
+closeBtn.MouseButton1Click:Connect(function()
+    -- Cria frame de confirmação
+    local confirmFrame = Instance.new("Frame", gui)
+    confirmFrame.Size = UDim2.new(0,260,0,120)
+    confirmFrame.Position = UDim2.new(0.5,-130,0.5,-60)
+    confirmFrame.BackgroundColor3 = THEME.Black
+    confirmFrame.ZIndex = 2000
+    Instance.new("UICorner", confirmFrame).CornerRadius = UDim.new(0,12)
+
+    -- Texto de confirmação
+    local confirmText = Instance.new("TextLabel", confirmFrame)
+    confirmText.Size = UDim2.new(1,-20,0,60)
+    confirmText.Position = UDim2.new(0,10,0,10)
+    confirmText.BackgroundTransparency = 1
+    confirmText.TextColor3 = THEME.Text
+    confirmText.Text = "Tem certeza que quer fechar o RED PAINEL?"
+    confirmText.Font = Enum.Font.GothamBold
+    confirmText.TextSize = 16
+    confirmText.TextWrapped = true
+    confirmText.TextXAlignment = Enum.TextXAlignment.Center
+    confirmText.TextYAlignment = Enum.TextYAlignment.Center
+    confirmText.ZIndex = 2001
+
+    -- Botão SIM
+    local yesBtn = Instance.new("TextButton", confirmFrame)
+    yesBtn.Size = UDim2.new(0,100,0,30)
+    yesBtn.Position = UDim2.new(0.1,0,1,-40)
+    yesBtn.BackgroundColor3 = THEME.RedMain
+    yesBtn.Text = "SIM"
+    yesBtn.TextColor3 = THEME.Text
+    yesBtn.Font = Enum.Font.GothamBold
+    yesBtn.TextSize = 14
+    yesBtn.ZIndex = 2001
+    Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0,6)
+
+    -- Botão NÃO
+    local noBtn = Instance.new("TextButton", confirmFrame)
+    noBtn.Size = UDim2.new(0,100,0,30)
+    noBtn.Position = UDim2.new(0.55,0,1,-40)
+    noBtn.BackgroundColor3 = THEME.RedLight
+    noBtn.Text = "NÃO"
+    noBtn.TextColor3 = THEME.Text
+    noBtn.Font = Enum.Font.GothamBold
+    noBtn.TextSize = 14
+    noBtn.ZIndex = 2001
+    Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0,6)
+
+    -- Função SIM: fechar tudo
+    yesBtn.MouseButton1Click:Connect(function()
+        -- Remove GUI
+        panel:Destroy()
+        float:Destroy()
+        confirmFrame:Destroy()
+
+        -- Desativa todas as funções
+        SETTINGS.AimEnabled = false
+        TeamCheckEnabled = false
+        DistanceEnabled = false
+
+        -- Remove ESP
+        for _,hl in pairs(ESP) do
+            hl:Destroy()
+        end
+        ESP = {}
+
+        -- Remove labels de distância
+        for _,lbl in pairs(DistanceLabels) do
+            lbl:Destroy()
+        end
+        DistanceLabels = {}
+
+        -- Remove FOVCircle
+        if FOVCircle then
+            FOVCircle.Visible = false
+            FOVCircle:Remove()
+        end
+    end)
+
+    -- Função NÃO: apenas fecha a confirmação
+    noBtn.MouseButton1Click:Connect(function()
+        confirmFrame:Destroy()
+    end)
+end)
+
 -- ========= BUTTON FUNCTION =========
 local function btn(txt,y)
 	local b = Instance.new("TextLabel", panel)
@@ -165,6 +261,7 @@ circle.Position = UDim2.new(0,1,0,1)
 circle.BackgroundColor3 = THEME.RedMain
 circle.ZIndex = 904
 Instance.new("UICorner", circle).CornerRadius = UDim.new(1,9)
+
 local function UpdateToggle()
 	if SETTINGS.AimEnabled then
 		circle:TweenPosition(UDim2.new(1,-19,0,1),"Out","Sine",0.2,true)
@@ -174,9 +271,19 @@ local function UpdateToggle()
 		toggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
 	end
 end
+
 toggle.InputBegan:Connect(function()
 	SETTINGS.AimEnabled = not SETTINGS.AimEnabled
 	UpdateToggle()
+	
+	local status = SETTINGS.AimEnabled and "ATIVADO ✅" or "DESATIVADO ❌"
+	pcall(function()
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "🎯 AIMBOT",
+			Text = status,
+			Duration = 3
+		})
+	end)
 end)
 UpdateToggle()
 
@@ -196,6 +303,7 @@ teamCircle.BackgroundColor3 = THEME.RedMain
 teamCircle.ZIndex = 904
 Instance.new("UICorner", teamCircle).CornerRadius = UDim.new(1,9)
 local TeamCheckEnabled = true
+
 local function UpdateTeamToggle()
 	if TeamCheckEnabled then
 		teamCircle:TweenPosition(UDim2.new(1,-19,0,1),"Out","Sine",0.2,true)
@@ -205,9 +313,19 @@ local function UpdateTeamToggle()
 		teamToggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
 	end
 end
+
 teamToggle.InputBegan:Connect(function()
 	TeamCheckEnabled = not TeamCheckEnabled
 	UpdateTeamToggle()
+	
+	local status = TeamCheckEnabled and "ATIVADO ✅" or "DESATIVADO ❌"
+	pcall(function()
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "🛡️ TEAM CHECK",
+			Text = status,
+			Duration = 3
+		})
+	end)
 end)
 UpdateTeamToggle()
 
@@ -239,37 +357,64 @@ local function UpdateDistToggle()
 		distToggle.BackgroundColor3 = Color3.fromRGB(100,20,20)
 	end
 end
+
 distToggle.InputBegan:Connect(function()
 	DistanceEnabled = not DistanceEnabled
 	UpdateDistToggle()
+	
+	local status = DistanceEnabled and "ATIVADO ✅" or "DESATIVADO ❌"
+	pcall(function()
+		game:GetService("StarterGui"):SetCore("SendNotification", {
+			Title = "📏 DISTANCE",
+			Text = status,
+			Duration = 3
+		})
+	end)
 end)
 UpdateDistToggle()
 
--- ========= DISTANCE RENDER =========
+-- ========= DISTANCE RENDER UNIVERSAL =========
 RunService.RenderStepped:Connect(function()
+    -- Remove labels antigos
 	for _,lbl in pairs(DistanceLabels) do
 		lbl:Destroy()
 	end
 	DistanceLabels = {}
 
-	if DistanceEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+	if DistanceEnabled and LocalPlayer.Character then
+        -- Função pra pegar a parte central de um personagem
+        local function getRoot(char)
+            if char:FindFirstChild("HumanoidRootPart") then return char.HumanoidRootPart end
+            if char:FindFirstChild("UpperTorso") then return char.UpperTorso end
+            if char:FindFirstChild("LowerTorso") then return char.LowerTorso end
+            for _,v in pairs(char:GetChildren()) do
+                if v:IsA("BasePart") then return v end
+            end
+            return nil
+        end
+
+        local localRoot = getRoot(LocalPlayer.Character)
+        if not localRoot then return end
+
 		for _,p in pairs(Players:GetPlayers()) do
-			if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-				local hrp = p.Character.HumanoidRootPart
-				local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
-				if onScreen then
-					local dist = (hrp.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-					local lbl = Instance.new("TextLabel", gui)
-					lbl.Size = UDim2.new(0,100,0,20)
-					lbl.Position = UDim2.new(0,pos.X-50,0,pos.Y-30)
-					lbl.BackgroundTransparency = 1
-					lbl.TextColor3 = Color3.fromRGB(255,255,255)
-					lbl.Font = Enum.Font.GothamBold
-					lbl.TextSize = 13
-					lbl.ZIndex = 2000
-					lbl.Text = string.format("%.1f", dist).."m"
-					table.insert(DistanceLabels,lbl)
-				end
+			if p ~= LocalPlayer and p.Character then
+                local targetRoot = getRoot(p.Character)
+                if targetRoot then
+                    local pos, onScreen = Camera:WorldToViewportPoint(targetRoot.Position)
+                    if onScreen then
+                        local dist = (targetRoot.Position - localRoot.Position).Magnitude
+                        local lbl = Instance.new("TextLabel", gui)
+                        lbl.Size = UDim2.new(0,100,0,20)
+                        lbl.Position = UDim2.new(0,pos.X-50,0,pos.Y-30)
+                        lbl.BackgroundTransparency = 1
+                        lbl.TextColor3 = Color3.fromRGB(255,255,255)
+                        lbl.Font = Enum.Font.GothamBold
+                        lbl.TextSize = 13
+                        lbl.ZIndex = 2000
+                        lbl.Text = string.format("%.1f", dist).."m"
+                        table.insert(DistanceLabels,lbl)
+                    end
+                end
 			end
 		end
 	end
@@ -374,6 +519,21 @@ RunService.RenderStepped:Connect(function()
 		Camera.CFrame = Camera.CFrame:Lerp(cf, SETTINGS.Smoothness)
 	end
 end)
+
+-- ========= CRÉDITOS =========
+local credits = Instance.new("TextLabel", panel)
+credits.Size = UDim2.new(1, -20, 0, 30)
+credits.Position = UDim2.new(0, 10, 1, -40) -- Embaixo do painel
+credits.BackgroundTransparency = 1
+credits.TextColor3 = THEME.Text
+credits.Font = Enum.Font.GothamBold
+credits.TextSize = 12
+credits.ZIndex = 905
+credits.Text = "CRIADOR\nTKK: gojou730"
+credits.TextScaled = false
+credits.TextWrapped = true
+credits.TextXAlignment = Enum.TextXAlignment.Center
+credits.TextYAlignment = Enum.TextYAlignment.Center
 
 -- ========= MENSAGEM AO EXECUTAR =========
 pcall(function()
